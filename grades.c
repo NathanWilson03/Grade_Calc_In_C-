@@ -68,7 +68,6 @@ double calc_numeric_score(int scores[], int days_late[], int points_off, int num
 }
 
 
-
 int main() {
     /* class information and increment vars */
     int i, num_assign, num_to_drop, late_deduction;  
@@ -134,8 +133,13 @@ int main() {
     final_score = calc_numeric_score(original_scores, late_array, late_deduction, assign_after_drop);
 
     printf("Numeric Score: %f\n", final_score);
+    printf("Points Penalty Per Day Late: %d\n", late_deduction);
+    printf("Number of Assignments Dropped: %d\n", num_to_drop);
+    printf("Values Provided:\nAssignment, Score, Weight, Days Late\n");
+    for(i = 0; i < num_assign; i++){
+	printf("%d, %d, %d, %d\n", assign_nums[i], original_scores[i], weight_array[i], late_array[i]);
+    }
   
-
     /* if weights don't add up */
     } else {
 	    printf("ERROR: Invalid values provided");
