@@ -1,27 +1,16 @@
 #include <stdio.h>
-/* assign info has calculated
- * value and assignment number
- */
-
-/* to make sure weights add up to 100 */
-int check_valid(int num_assign, int weights[]){
-	int i, weight_sum = 0;
-	for(i = 0; i < num_assign; i++) {
-		weight_sum += weights[i];
-	}
-	/* returns 1 if true */
-	return weight_sum == 100;
-}
 
 
-double calculate_assign_val(int score, int weight) {
+/* using weight and score only to  the score of 
+ * one assignment */
+double calc_assign_val(int score, int weight) {
 
     double weight_percentage = weight / 100.0;
     return score * weight_percentage;
 }
 
 /* method to find lowest assignment value 
- * from the weight and score calculated
+ * from the weight and score d
  * array, the needed array size and 
  * num of assignments
  */
@@ -31,7 +20,7 @@ double drop_lowest_value(double scores[], int array_size, int assign_nums[]) {
     double min_value = 100;
     int index_of_min = 0;
 
-    for (i = 0; i <= array_size; i++) {
+    for (i = 0; i < array_size; i++) {
         /* getting the min value  */ 
         if (scores[i] < min_value) {
             min_value = scores[i];
@@ -58,9 +47,33 @@ double drop_lowest_value(double scores[], int array_size, int assign_nums[]) {
     return min_value;
 }
 
+/* calculating the numeric score off of all assign scores, corresponding days late, the 
+ * constant points off(or late pentalty) and num_assign as the array size */
+double calc_numeric_score(int scores[], int days_late[], int points_off, int num_assign){
+	int i;
+	double total = 0.0;
+	for(i = 0; i < num_assign; i++) {
+		int adjusted = (double)scores[i] - points_off * days_late[i];
+
+		/* if the score goes negative */
+		if( adjusted < 0 ){
+			adjusted = 0;
+		} else {
+			total += adjusted;
+		}
+
+	}
+
+	return total / num_assign;
+}
+
+
+
 int main() {
     /* class information and increment vars */
-    int i, num_assign, num_to_drop, late_deduction;
+    int i, num_assign, num_to_drop, late_deduction;  
+
+    double final_score;
     char stats_option;
 
     /* individual assignment info */ 
@@ -69,7 +82,7 @@ int main() {
     scanf("%d %d %c", &late_deduction, &num_to_drop, &stats_option);
     scanf("%d", &num_assign);
 
-    int assign_nums[num_assign], weight_array[num_assign], late_array[num_assign];
+    int assign_nums[num_assign], weight_array[num_assign], late_array[num_assign], original_scores[num_assign];
     double numeric_scores[num_assign], dropped_val, average, score_sum = 0.0;
 
     for (i = 0; i < num_assign; i++) {
@@ -79,8 +92,9 @@ int main() {
         total_weight += weight;
         total_late += days_late;
 
-        /* calculate weighted score */ 
-        numeric_scores[i] = calculate_assign_val(score, weight);
+	original_scores[i] = score;
+        /*  weighted score */ 
+        numeric_scores[i] = calc_assign_val(score, weight);
 
         /* store individual assignment info */
         assign_nums[i] = assign_num;
@@ -89,7 +103,7 @@ int main() {
     }
 
     /* make sure weights add up */
-    if( check_valid(num_assign, weight_array) == 0 ) {
+    if( total_weight == 100 ) {
 
 
     /* creating var so num_assign is 
@@ -101,19 +115,26 @@ int main() {
         score_sum += numeric_scores[i];
     }
 
-    /* adjusting sum after dropping the lowest values */ 
-    for(i=0; i < num_to_drop; i++) {
-	dropped_val = drop_lowest_value(numeric_scores, assign_after_drop, assign_nums);
-    	assign_after_drop--;
-	score_sum -= dropped_val;
-
-
+    /* before we change the numeric_scores with functions lets copy them 
+     * now for the output */
+    double output_array[num_assign];
+    for(i=0; i < num_assign; i++){
+	    output_array[i] = numeric_scores[i];
     }
 
+    /* adjusting sum after dropping the lowest values */ 
+    for(i=0; i < num_to_drop; i++) {
+	/* don't think I need to keep track of this dropped_val but I am */
+	dropped_val = drop_lowest_value(numeric_scores, assign_after_drop, assign_nums);
+	/* adjusting the array size */
+    	assign_after_drop--;
+    }
 
-    average = score_sum / assign_after_drop;
+    /* spent an hour wondering why tf. Now turns out we compute the score not weighted...tf?!*/
+    final_score = calc_numeric_score(original_scores, late_array, late_deduction, assign_after_drop);
 
-    printf("the lowest value is: %f\n", dropped_val); 
+    printf("Numeric Score: %f\n", final_score);
+  
 
     /* if weights don't add up */
     } else {
